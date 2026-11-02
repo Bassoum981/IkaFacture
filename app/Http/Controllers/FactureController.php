@@ -8,6 +8,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use JsonException;
 
@@ -152,7 +153,7 @@ class FactureController extends Controller
 
         return response()->json([
             'success' => true,
-            'redirect' => route('facture.create'),
+            'redirect' => route('account.dashboard'),
         ]);
     }
 

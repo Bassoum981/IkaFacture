@@ -18,6 +18,15 @@
 <header class="border-b border-slate-800 p-4 flex justify-between items-center max-w-7xl mx-auto">
     <h1 class="text-xl font-bold tracking-tight text-indigo-400">Ika<span class="text-white">facture</span></h1>
 
+    <div class="hidden items-center gap-3 md:flex">
+        @auth
+            <span class="text-sm text-slate-400">{{ auth()->user()->name }}</span>
+            <a href="{{ route('account.dashboard') }}" class="rounded-lg border border-slate-700 px-3 py-2 text-xs font-medium text-slate-300 transition hover:border-slate-500 hover:text-white">Mes factures</a>
+        @else
+            <a href="{{ route('login') }}" class="rounded-lg border border-slate-700 px-3 py-2 text-xs font-medium text-slate-300 transition hover:border-slate-500 hover:text-white">Se connecter</a>
+        @endauth
+    </div>
+
     <!-- Switcher Mobile (Stratégie 2 : Onglets Édition / Aperçu) -->
     <div class="flex md:hidden bg-slate-900 p-1 rounded-lg border border-slate-800">
         <button @click="activeTab = 'form'" :class="activeTab === 'form' ? 'bg-indigo-600 text-white' : 'text-slate-400'" class="px-3 py-1.5 text-xs font-medium rounded-md transition">Édition</button>
