@@ -47,4 +47,45 @@ class AccountDashboardTest extends TestCase
             ->assertDontSee('FAC-2026-0002')
             ->assertDontSee('Client privé');
     }
+
+    public function test_authenticated_user_can_regenerate_their_invoice_pdf(): void
+    {
+        $user = User::factory()->create();
+        $facture = Facture::create([
+            'user_id' => $user->id,
+            'numero_facture' => 'FAC-2026-0003',
+            'date_emission' => now(),
+            'client_nom' => 'Client PDF',
+            'total_ttc' => 125000,
+            'statut' => 'generee',
+        ]);
+        $facture->lignes()->create([
+            'description' => 'Prestation conservée',
+            'quantite' => 1,
+            'prix_unitaire' => 125000,
+            'prix_total' => 125000,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('factures.download', $facture))
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+    }
+
+    public function test_user_cannot_regenerate_another_users_invoice(): void
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+        $facture = Facture::create([
+            'user_id' => $otherUser->id,
+            'numero_facture' => 'FAC-2026-0004',
+            'date_emission' => now(),
+            'client_nom' => 'Facture privée',
+            'statut' => 'generee',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('factures.download', $facture))
+            ->assertNotFound();
+    }
 }

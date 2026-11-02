@@ -52,6 +52,7 @@
                         <th class="px-5 py-3 font-medium">Émission</th>
                         <th class="px-5 py-3 text-right font-medium">Total TTC</th>
                         <th class="px-5 py-3 text-right font-medium">Statut</th>
+                        <th class="px-5 py-3 text-right font-medium">Action</th>
                     </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-800">
@@ -62,6 +63,11 @@
                             <td class="px-5 py-4 text-slate-400">{{ \Carbon\Carbon::parse($facture->date_emission)->format('d/m/Y') }}</td>
                             <td class="px-5 py-4 text-right font-medium text-white">{{ number_format($facture->total_ttc, 0, ',', ' ') }} FCFA</td>
                             <td class="px-5 py-4 text-right"><span class="rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-300">{{ ucfirst($facture->statut) }}</span></td>
+                            <td class="px-5 py-4 text-right">
+                                <a href="{{ route('factures.download', $facture) }}" class="inline-flex rounded-lg border border-indigo-500/40 px-3 py-1.5 text-xs font-medium text-indigo-300 transition hover:border-indigo-400 hover:bg-indigo-500/10 hover:text-indigo-200">
+                                    Régénérer le PDF
+                                </a>
+                            </td>
                         </tr>
                     @endforeach
                     </tbody>
@@ -73,5 +79,6 @@
         </section>
     @endif
 </main>
+@include('partials.legal-footer')
 </body>
 </html>

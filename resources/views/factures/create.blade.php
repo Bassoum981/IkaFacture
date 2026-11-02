@@ -408,5 +408,6 @@
     </div>
 </div>
 
+@include('partials.legal-footer')
 </body>
 </html>

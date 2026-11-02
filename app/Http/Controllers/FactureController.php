@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use JsonException;
+use Symfony\Component\HttpFoundation\Response;
 
 class FactureController extends Controller
 {
@@ -80,7 +81,7 @@ class FactureController extends Controller
         $montantTva = ($baseCalcul * $tauxTva) / 100;
         $totalTtc = $baseCalcul + $montantTva;
 
-        $facture = DB::transaction(function () use ($request, $clientData, $itemsData, $tauxTva, $remise, $sousTotal, $montantTva, $totalTtc) {
+        $facture = DB::transaction(function () use ($request, $clientData, $itemsData, $tauxTva, $remise, $sousTotal, $montantTva, $totalTtc, $logoPath) {
             $facture = Facture::create([
                 'user_id' => auth()->id(),
                 'numero_facture' => $this->nextInvoiceNumber(),
@@ -95,6 +96,7 @@ class FactureController extends Controller
                 'montant_tva' => $montantTva,
                 'total_ttc' => $totalTtc,
                 'notes' => $request->input('notes'),
+                'logo_path' => $logoPath,
                 'statut' => 'generee',
             ]);
 
@@ -112,14 +114,10 @@ class FactureController extends Controller
 
         session()->put('last_facture_id', $facture->id);
 
-        $logoData = null;
-        if ($logoPath && Storage::disk('public')->exists($logoPath)) {
-            $logoFullPath = Storage::disk('public')->path($logoPath);
-            $logoMimeType = mime_content_type($logoFullPath);
-            $logoData = 'data:'.$logoMimeType.';base64,'.base64_encode(file_get_contents($logoFullPath));
-        }
-
-        $pdf = Pdf::loadView('factures.pdf', compact('facture', 'logoData'));
+        $pdf = Pdf::loadView('factures.pdf', [
+            'facture' => $facture,
+            'logoData' => $this->logoData($facture),
+        ]);
 
         return $pdf->download("facture-{$facture->numero_facture}.pdf");
     }
@@ -155,6 +153,31 @@ class FactureController extends Controller
             'success' => true,
             'redirect' => route('account.dashboard'),
         ]);
+    }
+
+    public function download(Request $request, Facture $facture): Response
+    {
+        abort_unless($facture->user_id === $request->user()->id, 404);
+
+        $facture->load('lignes');
+        $pdf = Pdf::loadView('factures.pdf', [
+            'facture' => $facture,
+            'logoData' => $this->logoData($facture),
+        ]);
+
+        return $pdf->download("facture-{$facture->numero_facture}.pdf");
+    }
+
+    private function logoData(Facture $facture): ?string
+    {
+        if (! $facture->logo_path || ! Storage::disk('public')->exists($facture->logo_path)) {
+            return null;
+        }
+
+        $logoFullPath = Storage::disk('public')->path($facture->logo_path);
+        $logoMimeType = mime_content_type($logoFullPath);
+
+        return 'data:'.$logoMimeType.';base64,'.base64_encode(file_get_contents($logoFullPath));
     }
 
     private function nextInvoiceNumber(): string

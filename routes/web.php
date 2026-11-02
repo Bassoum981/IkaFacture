@@ -10,6 +10,7 @@ Route::get('/', [FactureController::class, 'create'])->name('facture.create');
 // Route pour enregistrer/generer la facture
 Route::post('/factures', [FactureController::class, 'store'])->name('factures.store');
 Route::post('/factures/register', [FactureController::class, 'registerAfterFacture'])->name('factures.register');
+Route::view('/mentions-legales', 'legal.notice')->name('legal.notice');
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/connexion', [AccountController::class, 'loginForm'])->name('login');
@@ -18,5 +19,6 @@ Route::middleware('guest')->group(function (): void {
 
 Route::middleware('auth')->group(function (): void {
     Route::get('/tableau-de-bord', [AccountController::class, 'dashboard'])->name('account.dashboard');
+    Route::get('/factures/{facture}/pdf', [FactureController::class, 'download'])->name('factures.download');
     Route::post('/deconnexion', [AccountController::class, 'logout'])->name('logout');
 });

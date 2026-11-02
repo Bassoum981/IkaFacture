@@ -27,5 +27,6 @@
     </form>
     <p class="mt-6 text-center text-sm text-slate-500">Pas encore de compte ? Créez-en un après avoir généré votre première facture.</p>
 </main>
+@include('partials.legal-footer')
 </body>
 </html>

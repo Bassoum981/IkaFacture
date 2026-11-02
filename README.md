@@ -40,6 +40,25 @@ php artisan serve
 
 Ouvrez ensuite `http://127.0.0.1:8000`. Remplissez le formulaire, ajoutez les lignes de prestation et téléchargez le PDF. Le numéro de facture suit le format `FAC-AAAA-NNNN` et est protégé contre les collisions concurrentes par une séquence annuelle et une contrainte unique.
 
+Après la création d’un compte, le tableau de bord `/tableau-de-bord` permet de consulter l’historique des factures et de régénérer le PDF d’une facture enregistrée.
+
+## Déploiement Docker
+
+L’image Docker contient uniquement Laravel avec Apache et PHP. MySQL reste un service externe : renseignez son hôte, son port, sa base, son utilisateur et son mot de passe via les variables `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME` et `DB_PASSWORD`.
+
+```bash
+docker build -t ikafacture .
+docker run --rm -p 8080:80 --env-file .env ikafacture
+```
+
+Avant le démarrage, configurez au minimum `APP_KEY`, `APP_ENV=production`, `APP_DEBUG=false`, `DB_CONNECTION=mysql` et les paramètres de connexion MySQL. Exécutez les migrations depuis le conteneur ou votre pipeline de déploiement :
+
+```bash
+docker exec <nom-du-conteneur> php artisan migrate --force
+```
+
+Les fichiers persistants de `storage/` doivent être montés sur un volume en production si les logos ou les journaux doivent survivre au remplacement du conteneur.
+
 ## Tests et qualité
 
 ```bash

@@ -117,7 +117,7 @@
 
 <!-- Pied de page -->
 <div class="footer">
-    Généré par Ikafacture — Solution de facturation simple et rapide
+    Généré par Ikafacture — Créé par Ibrahim Bassoum · ibassoum.dev
 </div>
 
 </body>
