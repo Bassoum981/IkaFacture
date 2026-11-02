@@ -9,6 +9,7 @@
         .header table { width: 100%; border-collapse: collapse; }
         .invoice-title { font-size: 24px; font-weight: bold; color: #1e293b; }
         .invoice-details { font-size: 12px; color: #64748b; margin-top: 5px; }
+        .logo { max-height: 65px; max-width: 180px; margin-bottom: 8px; }
         .client-info { text-align: right; }
         .client-name { font-weight: bold; font-size: 16px; color: #1e293b; }
         .client-address { font-size: 12px; color: #64748b; white-space: pre-line; }
@@ -26,7 +27,9 @@
         .totals .value { font-weight: bold; text-align: right; color: #1e293b; }
         .totals .total-ttc { border-top: 2px solid #0f172a; font-size: 15px; color: #0f172a; }
 
-        .footer { position: fixed; bottom: 30px; left: 0; right: 0; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0; pt-10px; }
+        .footer { position: fixed; bottom: 30px; left: 0; right: 0; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 10px; }
+        .meta { margin-top: 20px; font-size: 12px; color: #475569; }
+        .notes { margin-top: 25px; padding-top: 12px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #475569; white-space: pre-line; }
     </style>
 </head>
 <body>
@@ -36,9 +39,15 @@
     <table>
         <tr>
             <td>
+                @if($logoData)
+                    <img src="{{ $logoData }}" alt="Logo" class="logo">
+                @endif
                 <div class="invoice-title">FACTURE</div>
                 <div class="invoice-details">N° {{ $facture->numero_facture }}</div>
                 <div class="invoice-details">Date : {{ \Carbon\Carbon::parse($facture->date_emission)->format('d/m/Y') }}</div>
+                @if($facture->date_echeance)
+                    <div class="invoice-details">Échéance : {{ \Carbon\Carbon::parse($facture->date_echeance)->format('d/m/Y') }}</div>
+                @endif
             </td>
             <td class="client-info">
                 <div class="client-name">{{ $facture->client_nom }}</div>
@@ -74,9 +83,19 @@
 <div class="totals">
     <table>
         <tr>
-            <td class="label">Total HT :</td>
+            <td class="label">Sous-total HT :</td>
             <td class="value">{{ number_format($facture->total_ht, 0, ',', ' ') }} FCFA</td>
         </tr>
+        @if($facture->remise > 0)
+            <tr>
+                <td class="label">Remise :</td>
+                <td class="value">- {{ number_format($facture->remise, 0, ',', ' ') }} FCFA</td>
+            </tr>
+            <tr>
+                <td class="label">Base HT après remise :</td>
+                <td class="value">{{ number_format(max(0, $facture->total_ht - $facture->remise), 0, ',', ' ') }} FCFA</td>
+            </tr>
+        @endif
         <tr>
             <td class="label">TVA ({{ $facture->taux_tva }}%) :</td>
             <td class="value">{{ number_format($facture->montant_tva, 0, ',', ' ') }} FCFA</td>
@@ -87,6 +106,14 @@
         </tr>
     </table>
 </div>
+
+<div class="meta">
+    <strong>Conditions de règlement :</strong> {{ $facture->conditions_reglement }}
+</div>
+
+@if($facture->notes)
+    <div class="notes"><strong>Notes :</strong> {{ $facture->notes }}</div>
+@endif
 
 <!-- Pied de page -->
 <div class="footer">

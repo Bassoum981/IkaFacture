@@ -111,7 +111,14 @@ class FactureController extends Controller
 
         session()->put('last_facture_id', $facture->id);
 
-        $pdf = Pdf::loadView('factures.pdf', compact('facture', 'logoPath'));
+        $logoData = null;
+        if ($logoPath && Storage::disk('public')->exists($logoPath)) {
+            $logoFullPath = Storage::disk('public')->path($logoPath);
+            $logoMimeType = mime_content_type($logoFullPath);
+            $logoData = 'data:'.$logoMimeType.';base64,'.base64_encode(file_get_contents($logoFullPath));
+        }
+
+        $pdf = Pdf::loadView('factures.pdf', compact('facture', 'logoData'));
 
         return $pdf->download("facture-{$facture->numero_facture}.pdf");
     }
