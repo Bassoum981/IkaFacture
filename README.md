@@ -42,6 +42,8 @@ Ouvrez ensuite `http://127.0.0.1:8000`. Remplissez le formulaire, ajoutez les li
 
 Après la création d’un compte, le tableau de bord `/tableau-de-bord` permet de consulter l’historique des factures et de régénérer le PDF d’une facture enregistrée.
 
+La page d’accueil explique le service sur `/`. L’éditeur est disponible sur `/creer-facture`, avec un favicon IkaFacture (`IF`), des métadonnées SEO dynamiques, des balises Open Graph et une URL canonique. Les routes publiques sont exposées dans `/sitemap.xml`; `/robots.txt` autorise l’indexation en production et la bloque dans les autres environnements.
+
 ## Déploiement Docker
 
 L’image Docker contient uniquement Laravel avec Apache et PHP. MySQL reste un service externe : renseignez son hôte, son port, sa base, son utilisateur et son mot de passe via les variables `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME` et `DB_PASSWORD`.

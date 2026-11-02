@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ikafacture - Générateur de Facture Instantané</title>
+    <title>Créer une facture — IkaFacture</title>
+    @include('partials.seo', [
+        'title' => 'Créer une facture — IkaFacture',
+        'description' => 'Créez et téléchargez une facture professionnelle avec IkaFacture.',
+    ])
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Alpine.js -->

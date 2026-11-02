@@ -2,10 +2,13 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\FactureController;
+use App\Http\Controllers\SeoController;
 use Illuminate\Support\Facades\Route;
 
-// Afficher de l'editeur interactif
-Route::get('/', [FactureController::class, 'create'])->name('facture.create');
+Route::view('/', 'welcome')->name('home');
+Route::get('/creer-facture', [FactureController::class, 'create'])->name('facture.create');
+Route::get('/robots.txt', [SeoController::class, 'robots'])->name('seo.robots');
+Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('seo.sitemap');
 
 // Route pour enregistrer/generer la facture
 Route::post('/factures', [FactureController::class, 'store'])->name('factures.store');
