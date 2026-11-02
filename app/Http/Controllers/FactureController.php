@@ -82,7 +82,7 @@ class FactureController extends Controller
         $facture = DB::transaction(function () use ($request, $clientData, $itemsData, $tauxTva, $remise, $sousTotal, $montantTva, $totalTtc) {
             $facture = Facture::create([
                 'user_id' => auth()->id(),
-                'numero_facture' => 'FAC-'.date('Y').'-'.str_pad(Facture::count() + 1, 4, '0', STR_PAD_LEFT),
+                'numero_facture' => $this->nextInvoiceNumber(),
                 'date_emission' => now(),
                 'date_echeance' => $request->input('date_echeance'),
                 'conditions_reglement' => $request->input('conditions_reglement', 'Paiement comptant'),
@@ -154,5 +154,41 @@ class FactureController extends Controller
             'success' => true,
             'redirect' => route('facture.create'),
         ]);
+    }
+
+    private function nextInvoiceNumber(): string
+    {
+        $year = (int) now()->format('Y');
+
+        DB::table('invoice_sequences')->insertOrIgnore([
+            'year' => $year,
+            'current_number' => 0,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $sequence = DB::table('invoice_sequences')
+            ->where('year', $year)
+            ->lockForUpdate()
+            ->first();
+
+        $highestExistingNumber = Facture::query()
+            ->where('numero_facture', 'like', "FAC-{$year}-%")
+            ->pluck('numero_facture')
+            ->map(static function (string $number): int {
+                return (int) substr($number, -4);
+            })
+            ->max() ?? 0;
+
+        $nextNumber = max((int) $sequence->current_number, $highestExistingNumber) + 1;
+
+        DB::table('invoice_sequences')
+            ->where('year', $year)
+            ->update([
+                'current_number' => $nextNumber,
+                'updated_at' => now(),
+            ]);
+
+        return sprintf('FAC-%d-%04d', $year, $nextNumber);
     }
 }
