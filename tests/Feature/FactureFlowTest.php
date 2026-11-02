@@ -77,4 +77,28 @@ class FactureFlowTest extends TestCase
         $this->assertStringContainsString('30 jours', $html);
         $this->assertStringContainsString('Merci pour votre confiance.', $html);
     }
+
+    public function test_invoice_creation_persists_calculated_amounts_and_lines(): void
+    {
+        $response = $this->post(route('factures.store'), [
+            'client' => json_encode(['nom' => 'Client calcul']),
+            'items' => json_encode([
+                ['description' => 'Ligne 1', 'quantite' => 2, 'prix_unitaire' => 1500],
+                ['description' => 'Ligne 2', 'quantite' => 1, 'prix_unitaire' => 1000],
+            ]),
+            'tauxTva' => 18,
+            'remise' => 500,
+        ]);
+
+        $response->assertOk();
+        $facture = Facture::query()->with('lignes')->firstOrFail();
+
+        $this->assertEquals(4000, $facture->total_ht);
+        $this->assertEquals(500, $facture->remise);
+        $this->assertEquals(630, $facture->montant_tva);
+        $this->assertEquals(4130, $facture->total_ttc);
+        $this->assertCount(2, $facture->lignes);
+        $this->assertEquals(3000, $facture->lignes->first()->prix_total);
+        $this->assertSame($facture->id, session('last_facture_id'));
+    }
 }
